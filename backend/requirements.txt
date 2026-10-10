@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg[binary]
+pydantic
+pydantic-settings
+python-dotenv
+pytest
+httpx
+faker
+faiss-cpu
+sentence-transformers
+numpy
+
+google-generativeai

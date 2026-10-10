@@ -1,0 +1,51 @@
+# Environments
+.env
+.venv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Data & AI Caches (Do not expose your local DB connections or FAISS indices)
+backend/data/connections.json
+backend/data/schema_caches/
+backend/vector_db/
+*.faiss
+*.index
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# OS Files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,7 @@
+{
+  "Revenue": "SUM(order_items.quantity * order_items.unit_price)",
+  "COGS": "SUM(order_items.quantity * products.cost)",
+  "Gross Profit": "Revenue - COGS",
+  "Gross Margin": "(Gross Profit / Revenue) * 100",
+  "Active User": "A customer who has placed at least one order in the last 30 days."
+}
