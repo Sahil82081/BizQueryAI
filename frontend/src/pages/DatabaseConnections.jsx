@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { Link, Plus, Trash2, CheckCircle2, Play, AlertCircle, Database } from 'lucide-react';
+import { Link, Plus, Trash2, CheckCircle2, Play, AlertCircle, Database, Eye, EyeOff } from 'lucide-react';
 
 const DatabaseConnections = () => {
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState(localStorage.getItem('active_connection_id') || '');
   const [showAdd, setShowAdd] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   // Form state
   const [form, setForm] = useState({ name: '', url: '' });
@@ -46,24 +47,34 @@ const DatabaseConnections = () => {
 
   const handleTest = async (e) => {
     e.preventDefault();
-    setTestStatus('Testing...');
+    setTestStatus('Testing connection...');
+    const payload = { ...form, url: form.url.trim() };
     try {
-      await api.post('/api/connections/test', form);
+      await api.post('/api/connections/test', payload);
       setTestStatus('Success');
     } catch (e) {
-      setTestStatus('Failed: ' + (e.response?.data?.detail || e.message));
+      if (e.response?.status === 404) {
+        setTestStatus('Failed: 404 Not Found. Make sure the BizQuery AI backend (port 8000) is running, not another project!');
+      } else {
+        setTestStatus('Failed: ' + (e.response?.data?.detail || e.message));
+      }
     }
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
+    const payload = { ...form, url: form.url.trim() };
     try {
-      const res = await api.post('/api/connections', form);
+      const res = await api.post('/api/connections', payload);
       handleActivate(res.data.id);
       setShowAdd(false);
       loadConnections();
     } catch (e) {
-      setTestStatus('Failed to save: ' + (e.response?.data?.detail || e.message));
+      if (e.response?.status === 404) {
+        setTestStatus('Failed to save: 404 Not Found. Make sure the BizQuery AI backend (port 8000) is running.');
+      } else {
+        setTestStatus('Failed to save: ' + (e.response?.data?.detail || e.message));
+      }
     }
   };
 
@@ -76,7 +87,7 @@ const DatabaseConnections = () => {
         </div>
         {!showAdd && (
           <button 
-            onClick={() => setShowAdd(true)}
+            onClick={() => { setShowAdd(true); setTestStatus(''); }}
             className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
           >
             <Plus size={16} /> Add Database
@@ -94,8 +105,25 @@ const DatabaseConnections = () => {
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1">PostgreSQL Connection URL</label>
-              <input type="password" value={form.url} onChange={e => setForm({...form, url: e.target.value})} placeholder="postgresql://user:pass@host:5432/db?sslmode=require" className="w-full bg-[#14161f] border border-gray-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none" required />
-              <p className="text-xs text-gray-500 mt-1">Passwords are masked immediately and stored securely on the backend.</p>
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={form.url} 
+                  onChange={e => setForm({...form, url: e.target.value})} 
+                  placeholder="postgresql://user:pass@host:5432/db?sslmode=require" 
+                  className="w-full bg-[#14161f] border border-gray-700 rounded-lg p-2.5 pr-10 text-white focus:border-blue-500 outline-none font-mono text-sm" 
+                  required 
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  title={showPassword ? "Hide URL" : "Show URL"}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Supports Neon, Supabase, AWS RDS, or local PostgreSQL URLs.</p>
             </div>
             
             {testStatus && (

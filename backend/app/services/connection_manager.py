@@ -71,9 +71,12 @@ class ConnectionManager:
 
     def test_connection(self, url: str) -> bool:
         try:
-            engine = create_engine(url, connect_args={"connect_timeout": 5})
-            with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
-            return True
+            engine = create_engine(url, connect_args={"connect_timeout": 15})
+            try:
+                with engine.connect() as conn:
+                    conn.execute(text("SELECT 1"))
+                return True
+            finally:
+                engine.dispose()
         except Exception as e:
             raise ValueError(str(e))
