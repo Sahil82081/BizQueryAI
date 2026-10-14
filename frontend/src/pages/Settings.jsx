@@ -16,8 +16,8 @@ const Settings = () => {
           <div className="space-y-4 max-w-md">
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">Backend API URL</label>
-              <input type="text" disabled value="http://localhost:8000" className="w-full bg-[#14161f] border border-gray-700 rounded-lg p-2.5 text-gray-500 text-sm cursor-not-allowed" />
-              <p className="text-xs text-gray-600 mt-1">Controlled by environment variables.</p>
+              <input type="text" disabled value={import.meta.env.VITE_API_URL || 'http://localhost:8000'} className="w-full bg-[#14161f] border border-gray-700 rounded-lg p-2.5 text-gray-400 text-sm cursor-not-allowed font-mono" />
+              <p className="text-xs text-gray-500 mt-1">Controlled by VITE_API_URL environment variable.</p>
             </div>
             
             <div>
