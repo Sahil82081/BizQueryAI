@@ -20,4 +20,10 @@ npm install
 npm run dev
 ```
 
-See the `docs/` folder for comprehensive documentation on Architecture, Security, and Limitations.
+## Deployment
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full instructions on deploying both the Frontend and Backend to Vercel.
+
+## Documentation
+See the `docs/` folder for comprehensive documentation on Architecture, Security, Limitations, and Deployment.
+

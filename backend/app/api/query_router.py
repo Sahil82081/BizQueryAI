@@ -13,9 +13,14 @@ from app.services.analytics_engine import AnalyticsEngine
 router = APIRouter(prefix="/api/query", tags=["query"])
 
 def load_glossary():
-    path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "business_glossary.json")
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
+    from app.utils.paths import get_data_dir
+    data_dir_path = os.path.join(get_data_dir(), "business_glossary.json")
+    if os.path.exists(data_dir_path):
+        with open(data_dir_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    fallback_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "business_glossary.json")
+    if os.path.exists(fallback_path):
+        with open(fallback_path, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 

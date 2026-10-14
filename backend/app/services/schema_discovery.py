@@ -5,13 +5,14 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.schemas.schema_info import ColumnMetadata, TableMetadata, SchemaMetadata, FullDatabaseSchema, SyncReport, ForeignKeyInfo
+from app.utils.paths import get_data_dir
 
 class SchemaDiscoveryService:
     def __init__(self, db: Session, connection_id: str):
         self.db = db
         self.connection_id = connection_id
         # Namespace the cache per connection
-        cache_dir = os.path.join(os.path.dirname(__file__), "..", "..", "data", "schema_caches")
+        cache_dir = os.path.join(get_data_dir(), "schema_caches")
         os.makedirs(cache_dir, exist_ok=True)
         self.cache_file = os.path.join(cache_dir, f"schema_{connection_id}.json")
 

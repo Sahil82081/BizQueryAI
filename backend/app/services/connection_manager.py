@@ -3,18 +3,23 @@ import json
 import uuid
 from typing import List, Dict, Any, Optional
 from sqlalchemy import create_engine, text
+from app.utils.paths import get_data_dir
 
-CONNECTIONS_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "data", "connections.json")
+def get_connections_file_path() -> str:
+    return os.path.join(get_data_dir(), "connections.json")
 
 class ConnectionManager:
     def __init__(self):
-        os.makedirs(os.path.dirname(CONNECTIONS_FILE), exist_ok=True)
-        if not os.path.exists(CONNECTIONS_FILE):
-            with open(CONNECTIONS_FILE, "w") as f:
+        self.connections_file = get_connections_file_path()
+        os.makedirs(os.path.dirname(self.connections_file), exist_ok=True)
+        if not os.path.exists(self.connections_file):
+            with open(self.connections_file, "w") as f:
                 json.dump([], f)
                 
     def get_all_connections(self, mask_passwords=True) -> List[Dict[str, Any]]:
-        with open(CONNECTIONS_FILE, "r") as f:
+        if not os.path.exists(self.connections_file):
+            return []
+        with open(self.connections_file, "r") as f:
             conns = json.load(f)
             
         if mask_passwords:
@@ -44,7 +49,7 @@ class ConnectionManager:
             "status": "Connected"
         }
         conns.append(new_conn)
-        with open(CONNECTIONS_FILE, "w") as f:
+        with open(self.connections_file, "w") as f:
             json.dump(conns, f, indent=2)
             
         masked = dict(new_conn)
@@ -55,11 +60,11 @@ class ConnectionManager:
         import shutil
         conns = self.get_all_connections(mask_passwords=False)
         conns = [c for c in conns if c["id"] != conn_id]
-        with open(CONNECTIONS_FILE, "w") as f:
+        with open(self.connections_file, "w") as f:
             json.dump(conns, f, indent=2)
             
         # Clean up orphaned schema caches
-        cache_file = os.path.join(os.path.dirname(__file__), "..", "..", "data", "schema_caches", f"schema_{conn_id}.json")
+        cache_file = os.path.join(get_data_dir(), "schema_caches", f"schema_{conn_id}.json")
         if os.path.exists(cache_file):
             os.remove(cache_file)
             
