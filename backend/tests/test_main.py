@@ -10,3 +10,16 @@ def test_read_health():
     assert "status" in data
     assert data["service"] == "BizQuery AI"
     assert "database_connected" in data
+
+def test_api_v1_health_get():
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "healthy"}
+
+def test_api_v1_health_head():
+    response = client.head("/api/v1/health")
+    assert response.status_code == 200
+
+def test_health_head():
+    response = client.head("/health")
+    assert response.status_code == 200

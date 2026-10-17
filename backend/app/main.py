@@ -15,8 +15,9 @@ app.add_middleware(BaseHTTPMiddleware, dispatch=log_request_middleware)
 def root():
     return {"status": "ok", "message": f"{settings.PROJECT_NAME} API is running"}
 
-@app.get("/health")
-def health():
+@app.api_route("/health", methods=["GET", "HEAD"])
+@app.api_route("/api/v1/health", methods=["GET", "HEAD"])
+async def health():
     return {"status": "healthy"}
 
 @app.get("/api/health")
