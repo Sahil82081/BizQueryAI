@@ -79,16 +79,16 @@ const DatabaseConnections = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto animate-in fade-in">
-      <div className="mb-6 flex justify-between items-center">
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
+      <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">Database Connections</h2>
-          <p className="text-gray-400 mt-2">Manage and switch between PostgreSQL databases securely.</p>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Database Connections</h2>
+          <p className="text-[#6d949b] text-sm mt-1">Manage and switch between PostgreSQL databases securely.</p>
         </div>
         {!showAdd && (
           <button 
             onClick={() => { setShowAdd(true); setTestStatus(''); }}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
+            className="bg-[#00e5bf] hover:bg-[#25f4d1] active:scale-95 text-[#022125] px-4 py-2 rounded-xl flex items-center gap-2 text-xs md:text-sm font-bold shadow-md shadow-[#00e5bf]/25 transition-all"
           >
             <Plus size={16} /> Add Database
           </button>
@@ -96,60 +96,90 @@ const DatabaseConnections = () => {
       </div>
 
       {showAdd && (
-        <div className="bg-[#1a1d27] border border-gray-800 rounded-xl p-6 shadow-xl mb-8">
-          <h3 className="text-lg font-semibold text-white mb-4 border-b border-gray-800 pb-2">New Connection</h3>
+        <div className="bg-[#041d21]/80 backdrop-blur-md border border-[#0d3b41] rounded-2xl p-6 shadow-2xl mb-6">
+          <h3 className="text-base font-bold text-white mb-4 border-b border-[#0d3b41] pb-2">New Connection</h3>
           <form className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Connection Name</label>
-              <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. Sales Production DB" className="w-full bg-[#14161f] border border-gray-700 rounded-lg p-2.5 text-white focus:border-blue-500 outline-none" required />
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#6d949b] mb-1.5">Connection Name</label>
+              <input 
+                type="text" 
+                value={form.name} 
+                onChange={e => setForm({...form, name: e.target.value})} 
+                placeholder="e.g. Sales Production DB" 
+                className="w-full bg-[#021316] border border-[#0d3b41] rounded-xl p-2.5 text-white placeholder-[#557a80] text-sm focus:border-[#00e5bf]/60 outline-none transition-colors" 
+                required 
+              />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">PostgreSQL Connection URL</label>
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#6d949b] mb-1.5">PostgreSQL Connection URL</label>
               <div className="relative">
                 <input 
                   type={showPassword ? "text" : "password"} 
                   value={form.url} 
                   onChange={e => setForm({...form, url: e.target.value})} 
                   placeholder="postgresql://user:pass@host:5432/db?sslmode=require" 
-                  className="w-full bg-[#14161f] border border-gray-700 rounded-lg p-2.5 pr-10 text-white focus:border-blue-500 outline-none font-mono text-sm" 
+                  className="w-full bg-[#021316] border border-[#0d3b41] rounded-xl p-2.5 pr-10 text-white placeholder-[#557a80] focus:border-[#00e5bf]/60 outline-none font-mono text-sm transition-colors" 
                   required 
                 />
                 <button 
                   type="button" 
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5d8288] hover:text-white"
                   title={showPassword ? "Hide URL" : "Show URL"}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Supports Neon, Supabase, AWS RDS, or local PostgreSQL URLs.</p>
+              <p className="text-xs text-[#52777d] mt-1.5">Supports Neon, Supabase, AWS RDS, or local PostgreSQL URLs.</p>
             </div>
             
             {testStatus && (
-              <div className={`text-sm p-3 rounded-lg ${testStatus === 'Success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+              <div className={`text-xs p-3 rounded-xl ${testStatus === 'Success' ? 'bg-[#00e5bf]/10 text-[#00e5bf] border border-[#00e5bf]/30' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                 {testStatus}
               </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-4">
-              <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
-              <button type="button" onClick={handleTest} disabled={!form.name || !form.url} className="bg-[#252a36] hover:bg-[#2d3342] text-white px-4 py-2 rounded-lg border border-gray-700 disabled:opacity-50">Test Connection</button>
-              <button type="button" onClick={handleSave} disabled={testStatus !== 'Success'} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg disabled:opacity-50 transition-colors">Save & Connect</button>
+            <div className="flex justify-end gap-3 pt-3">
+              <button 
+                type="button" 
+                onClick={() => setShowAdd(false)} 
+                className="px-4 py-2 text-xs text-[#6d949b] hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button" 
+                onClick={handleTest} 
+                disabled={!form.name || !form.url} 
+                className="bg-[#062429] hover:bg-[#09353c] text-white text-xs px-4 py-2 rounded-xl border border-[#0d3b41] disabled:opacity-50 transition-colors"
+              >
+                Test Connection
+              </button>
+              <button 
+                type="button" 
+                onClick={handleSave} 
+                disabled={testStatus !== 'Success'} 
+                className="bg-[#00e5bf] hover:bg-[#25f4d1] text-[#022125] font-bold text-xs px-4 py-2 rounded-xl disabled:opacity-50 transition-all shadow-md shadow-[#00e5bf]/25"
+              >
+                Save & Connect
+              </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {loading ? (
-          <div className="text-gray-500 p-8 text-center">Loading connections...</div>
+          <div className="text-[#557b81] p-8 text-center text-sm font-mono">Loading connections...</div>
         ) : connections.length === 0 && !showAdd ? (
-          <div className="bg-[#1a1d27] border border-gray-800 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center">
-            <Link size={48} className="text-gray-600 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-300 mb-2">No database connected</h3>
-            <p className="text-gray-500 mb-6 max-w-sm">Add a PostgreSQL database to start exploring your schemas and executing AI queries.</p>
-            <button onClick={() => setShowAdd(true)} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-colors">
+          <div className="bg-[#041d21]/70 border border-[#0d3b41] border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center">
+            <Link size={44} className="text-[#51767c] mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">No database connected</h3>
+            <p className="text-[#6d949b] mb-6 max-w-sm text-sm">Add a PostgreSQL database to start exploring your schemas and executing AI queries.</p>
+            <button 
+              onClick={() => setShowAdd(true)} 
+              className="bg-[#00e5bf] hover:bg-[#25f4d1] active:scale-95 text-[#022125] font-bold px-6 py-2.5 rounded-xl flex items-center gap-2 text-sm shadow-md transition-all"
+            >
               <Plus size={18} /> Add Database
             </button>
           </div>
@@ -157,32 +187,49 @@ const DatabaseConnections = () => {
           connections.map(conn => {
             const isActive = activeId === conn.id;
             return (
-              <div key={conn.id} className={`bg-[#1a1d27] border ${isActive ? 'border-blue-500' : 'border-gray-800'} rounded-xl p-5 flex items-center justify-between transition-all shadow-lg`}>
-                <div className="flex flex-col gap-1">
+              <div 
+                key={conn.id} 
+                className={`bg-[#041d21]/75 backdrop-blur-md border ${
+                  isActive ? 'border-[#00e5bf]/60 shadow-[0_0_20px_rgba(0,229,191,0.12)]' : 'border-[#0d3b41] hover:border-[#00e5bf]/30'
+                } rounded-2xl p-4 md:p-5 flex items-center justify-between transition-all duration-200 shadow-xl`}
+              >
+                <div className="flex flex-col gap-1 truncate pr-3">
                   <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-lg text-white">{conn.name}</h3>
+                    <h3 className="font-bold text-base text-white truncate">{conn.name}</h3>
                     {isActive ? (
-                      <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-wide">Active</span>
+                      <span className="text-[10px] font-mono font-bold text-[#00e5bf] bg-[#00e5bf]/15 border border-[#00e5bf]/30 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        Active
+                      </span>
                     ) : (
-                      <span className="text-[10px] font-bold text-gray-500 bg-[#252a36] border border-gray-700 px-2 py-0.5 rounded-full uppercase tracking-wide">Saved</span>
+                      <span className="text-[10px] font-mono text-[#6d949b] bg-[#062429] border border-[#0d3b41] px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        Saved
+                      </span>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 font-mono flex items-center gap-2">
-                    <Database size={12}/> {conn.url}
+                  <div className="text-xs text-[#6d949b] font-mono flex items-center gap-2 truncate">
+                    <Database size={12} className="text-[#00e5bf] shrink-0"/> 
+                    <span className="truncate">{conn.url}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   {!isActive && (
-                    <button onClick={() => handleActivate(conn.id)} className="bg-[#252a36] hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-700 hover:border-transparent">
+                    <button 
+                      onClick={() => handleActivate(conn.id)} 
+                      className="bg-[#06292f] hover:bg-[#00e5bf] hover:text-[#022125] text-[#00e5bf] px-4 py-2 rounded-xl text-xs font-semibold transition-all border border-[#0e4850] hover:border-transparent active:scale-95"
+                    >
                       Activate
                     </button>
                   )}
-                  <button onClick={() => handleDelete(conn.id)} className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete Connection">
-                    <Trash2 size={18} />
+                  <button 
+                    onClick={() => handleDelete(conn.id)} 
+                    className="p-2 text-[#51767c] hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors" 
+                    title="Delete Connection"
+                  >
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>
-            )
+            );
           })
         )}
       </div>

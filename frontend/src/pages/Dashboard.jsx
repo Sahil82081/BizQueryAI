@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Sparkles, Database, TrendingUp } from 'lucide-react';
+import { ArrowRight, Sparkles, Database, TrendingUp, Layers } from 'lucide-react';
 import api from '../utils/api';
 
 const Dashboard = () => {
@@ -40,7 +40,7 @@ const Dashboard = () => {
         setStats(prev => ({ 
           ...prev, 
           queriesRun: hist.length,
-          insights: successful // Treat successful queries as generated insights
+          insights: successful
         }));
         
         // Grab top 3 recent for the UI
@@ -58,50 +58,68 @@ const Dashboard = () => {
     : ['What was our revenue last month?', 'Compare revenue by category', 'Show daily sales for this week'];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
+    <div className="max-w-[1240px] mx-auto space-y-8 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Welcome back</h1>
-        <p className="text-gray-400 mt-2">Here's a quick overview of your workspace intelligence.</p>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Welcome back</h1>
+        <p className="text-[#6d949b] text-sm mt-1">Here's a quick overview of your workspace intelligence.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Active Schemas', val: stats.schemas, icon: Database, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-          { label: 'Tables Indexed', val: stats.tables, icon: Database, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-          { label: 'Queries Run', val: stats.queriesRun, icon: Sparkles, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-          { label: 'Insights Generated', val: stats.insights, icon: TrendingUp, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+          { label: 'Active Schemas', val: stats.schemas, icon: Database, color: 'text-[#00e5bf]', bg: 'bg-[#00e5bf]/10' },
+          { label: 'Tables Indexed', val: stats.tables, icon: Layers, color: 'text-[#14b8a6]', bg: 'bg-[#14b8a6]/10' },
+          { label: 'Queries Run', val: stats.queriesRun, icon: Sparkles, color: 'text-[#5eead4]', bg: 'bg-[#5eead4]/10' },
+          { label: 'Insights Generated', val: stats.insights, icon: TrendingUp, color: 'text-amber-400', bg: 'bg-amber-400/10' },
         ].map((s, i) => (
-          <div key={i} className="bg-[#14161f] border border-gray-800 p-6 rounded-xl flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${s.bg} ${s.color}`}>
-              <s.icon size={24} />
+          <div 
+            key={i} 
+            className="bg-[#041d21]/75 backdrop-blur-md border border-[#0d3b41] hover:border-[#00e5bf]/40 p-5 rounded-2xl flex items-center gap-4 transition-all duration-300 hover:-translate-y-0.5 shadow-xl group"
+          >
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${s.bg} ${s.color} transition-transform duration-200 group-hover:scale-105`}>
+              <s.icon size={22} />
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">{s.val}</div>
-              <div className="text-xs text-gray-500 uppercase font-semibold">{s.label}</div>
+              <div className="text-2xl font-extrabold text-white font-mono">{s.val}</div>
+              <div className="text-[11px] text-[#6d949b] uppercase font-mono tracking-wider font-semibold">{s.label}</div>
             </div>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-gradient-to-br from-blue-900/40 to-[#14161f] border border-blue-500/20 p-8 rounded-2xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#06353d]/90 to-[#031c20] border border-[#00e5bf]/30 p-8 rounded-2xl relative overflow-hidden shadow-2xl">
           <div className="relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#00e5bf]/15 text-[#00e5bf] border border-[#00e5bf]/30 text-xs font-mono mb-4">
+              <Sparkles size={12} /> Natural Language Querying
+            </div>
             <h2 className="text-2xl font-bold text-white mb-2">Ask your data anything.</h2>
-            <p className="text-blue-200/70 mb-6 max-w-sm">Use natural language to query metrics, visualize trends, and uncover hidden business insights.</p>
-            <button onClick={() => navigate('/query')} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2">
-              Start Query <ArrowRight size={18} />
+            <p className="text-[#8eb8be] mb-6 max-w-sm text-sm leading-relaxed">
+              Use natural language to query metrics, visualize trends, and uncover hidden business insights.
+            </p>
+            <button 
+              onClick={() => navigate('/query')} 
+              className="bg-[#00e5bf] hover:bg-[#25f4d1] active:scale-95 text-[#022125] font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm shadow-md shadow-[#00e5bf]/25"
+            >
+              Start Query <ArrowRight size={16} />
             </button>
           </div>
-          <Sparkles className="absolute -bottom-6 -right-6 text-blue-500/10 w-48 h-48" />
+          <Sparkles className="absolute -bottom-8 -right-8 text-[#00e5bf]/10 w-56 h-56 pointer-events-none" />
         </div>
 
-        <div className="bg-[#14161f] border border-gray-800 p-6 rounded-2xl">
-          <h3 className="text-lg font-semibold text-white mb-4">Recent Queries</h3>
-          <div className="space-y-3">
+        <div className="bg-[#041d21]/75 backdrop-blur-md border border-[#0d3b41] p-6 rounded-2xl shadow-xl">
+          <h3 className="text-base font-bold text-white mb-4 tracking-tight">Recent Queries</h3>
+          <div className="space-y-2.5">
             {displayQueries.map((q, i) => (
-              <div key={i} className="flex items-center justify-between p-3 bg-[#1a1d27] rounded-lg border border-gray-800 hover:border-gray-700 cursor-pointer transition-colors" onClick={() => navigate('/query')}>
-                <span className="text-sm text-gray-300 truncate max-w-[85%]">{q}</span>
-                <ArrowRight size={14} className="text-gray-500" />
+              <div 
+                key={i} 
+                className="flex items-center justify-between p-3.5 bg-[#021316] rounded-xl border border-[#0d3b41] hover:border-[#00e5bf]/40 hover:bg-[#052227] cursor-pointer transition-all duration-200 group" 
+                onClick={() => navigate('/query')}
+              >
+                <div className="flex items-center gap-2.5 truncate max-w-[85%]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00e5bf] shrink-0"></span>
+                  <span className="text-xs text-[#9bbec4] group-hover:text-white truncate font-medium">{q}</span>
+                </div>
+                <ArrowRight size={14} className="text-[#51747a] group-hover:text-[#00e5bf] transition-colors" />
               </div>
             ))}
           </div>
