@@ -23,3 +23,12 @@ def test_api_v1_health_head():
 def test_health_head():
     response = client.head("/health")
     assert response.status_code == 200
+
+def test_root_get():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
+def test_root_head():
+    response = client.head("/")
+    assert response.status_code == 200

@@ -45,10 +45,15 @@ const DatabaseConnections = () => {
     } catch (e) {}
   };
 
+  const sanitizeUrl = (rawUrl) => {
+    if (!rawUrl) return '';
+    return rawUrl.trim().split(/\s+/)[0];
+  };
+
   const handleTest = async (e) => {
     e.preventDefault();
     setTestStatus('Testing connection...');
-    const payload = { ...form, url: form.url.trim() };
+    const payload = { ...form, url: sanitizeUrl(form.url) };
     try {
       await api.post('/api/connections/test', payload);
       setTestStatus('Success');
@@ -63,7 +68,7 @@ const DatabaseConnections = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    const payload = { ...form, url: form.url.trim() };
+    const payload = { ...form, url: sanitizeUrl(form.url) };
     try {
       const res = await api.post('/api/connections', payload);
       handleActivate(res.data.id);

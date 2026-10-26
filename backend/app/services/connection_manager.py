@@ -8,6 +8,28 @@ from app.utils.paths import get_data_dir
 def get_connections_file_path() -> str:
     return os.path.join(get_data_dir(), "connections.json")
 
+def sanitize_connection_url(url: str) -> str:
+    """
+    Sanitizes database connection URLs:
+    - Trims whitespace and extracts only the URL token to prevent accidental concatenation 
+      of trailing environment variables (e.g. '...&channel_binding=require GEMINI_API_KEY=...').
+    - Normalizes 'postgresql://' or 'postgres://' schemes to 'postgresql+psycopg://' so that
+      SQLAlchemy uses psycopg (v3) seamlessly without requiring psycopg2.
+    """
+    if not url:
+        return url
+    parts = url.strip().split()
+    if not parts:
+        return ""
+    clean_url = parts[0]
+
+    if clean_url.startswith("postgres://"):
+        clean_url = "postgresql+psycopg://" + clean_url[len("postgres://"):]
+    elif clean_url.startswith("postgresql://") and not clean_url.startswith("postgresql+"):
+        clean_url = "postgresql+psycopg://" + clean_url[len("postgresql://"):]
+
+    return clean_url
+
 class ConnectionManager:
     def __init__(self):
         self.connections_file = get_connections_file_path()
@@ -37,15 +59,18 @@ class ConnectionManager:
         conns = self.get_all_connections(mask_passwords=False)
         for c in conns:
             if c["id"] == conn_id:
-                return c
+                c_copy = dict(c)
+                c_copy["url"] = sanitize_connection_url(c.get("url", ""))
+                return c_copy
         return None
         
     def add_connection(self, name: str, url: str) -> Dict[str, Any]:
+        clean_url = sanitize_connection_url(url)
         conns = self.get_all_connections(mask_passwords=False)
         new_conn = {
             "id": str(uuid.uuid4()),
             "name": name,
-            "url": url,
+            "url": clean_url,
             "status": "Connected"
         }
         conns.append(new_conn)
@@ -75,8 +100,9 @@ class ConnectionManager:
             shutil.rmtree(vector_dir)
 
     def test_connection(self, url: str) -> bool:
+        clean_url = sanitize_connection_url(url)
         try:
-            engine = create_engine(url, connect_args={"connect_timeout": 15})
+            engine = create_engine(clean_url, connect_args={"connect_timeout": 15})
             try:
                 with engine.connect() as conn:
                     conn.execute(text("SELECT 1"))

@@ -11,7 +11,7 @@ app = FastAPI(title=settings.PROJECT_NAME)
 
 app.add_middleware(BaseHTTPMiddleware, dispatch=log_request_middleware)
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def root():
     return {"status": "ok", "message": f"{settings.PROJECT_NAME} API is running"}
 

@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.orm import Session
 from fastapi import Request, HTTPException
-from app.services.connection_manager import ConnectionManager
+from app.services.connection_manager import ConnectionManager, sanitize_connection_url
 
 Base = declarative_base()
 
@@ -18,7 +18,8 @@ def get_engine_for_connection(conn_id: str):
     if not conn_info:
         raise ValueError("Database connection not found.")
         
-    engine = create_engine(conn_info["url"], pool_pre_ping=True, pool_size=5, max_overflow=10)
+    clean_url = sanitize_connection_url(conn_info["url"])
+    engine = create_engine(clean_url, pool_pre_ping=True, pool_size=5, max_overflow=10)
     _engines[conn_id] = engine
     return engine
 
