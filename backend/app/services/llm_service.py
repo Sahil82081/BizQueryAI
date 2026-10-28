@@ -40,6 +40,8 @@ Use these definitions to resolve business terminology:
 4. Generate ONLY analytical SELECT queries.
 5. If the question is highly ambiguous (e.g., "best customers" without defining "best" as revenue or volume), request clarification instead of guessing.
 6. Time Boundaries: When asked for "last N months" and grouping by month, carefully filter using precise calendar month boundaries so you don't accidentally pull N+1 months of data due to partial current months.
+7. Schema Qualification: Use the exact table names and schema prefixes provided in the schema above (e.g., `finance.payments`, `public.orders`).
+8. Revenue Calculation: Use the definitions in the business glossary (e.g. `order_items.quantity * order_items.unit_price` joined with `orders.order_date`).
 
 ### OUTPUT FORMAT
 Provide your response strictly as a JSON object (without markdown code blocks, just raw JSON) matching this structure:

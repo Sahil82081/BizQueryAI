@@ -8,7 +8,7 @@ from app.schemas.schema_info import ColumnMetadata, TableMetadata, SchemaMetadat
 from app.utils.paths import get_data_dir
 
 class SchemaDiscoveryService:
-    def __init__(self, db: Session, connection_id: str):
+    def __init__(self, db: Session, connection_id: str = "default"):
         self.db = db
         self.connection_id = connection_id
         # Namespace the cache per connection
@@ -77,7 +77,7 @@ class SchemaDiscoveryService:
             
         result_schemas = []
         for s_name, tables in schemas_dict.items():
-            result_tables = [TableMetadata(name=t_name, columns=cols) for t_name, cols in tables.items()]
+            result_tables = [TableMetadata(name=t_name, schema_name=s_name, columns=cols) for t_name, cols in tables.items()]
             result_schemas.append(SchemaMetadata(name=s_name, tables=result_tables))
             
         return FullDatabaseSchema(schemas=result_schemas)
@@ -92,6 +92,63 @@ class SchemaDiscoveryService:
     def save_schema(self, schema: FullDatabaseSchema):
         with open(self.cache_file, "w", encoding="utf-8") as f:
             f.write(schema.model_dump_json())
+
+    def compute_diff(self, old_schema: Optional[FullDatabaseSchema], new_schema: FullDatabaseSchema) -> SyncReport:
+        added_schemas, removed_schemas = [], []
+        added_tables, removed_tables, modified_tables = [], [], []
+        added_cols, removed_cols = [], []
+        
+        old_schemas_map = {s.name: s for s in (old_schema.schemas if old_schema else [])}
+        new_schemas_map = {s.name: s for s in new_schema.schemas}
+        
+        for s_name in new_schemas_map:
+            if s_name not in old_schemas_map:
+                added_schemas.append(s_name)
+        for s_name in old_schemas_map:
+            if s_name not in new_schemas_map:
+                removed_schemas.append(s_name)
+                
+        old_tables_map = {}
+        if old_schema:
+            for s in old_schema.schemas:
+                for t in s.tables:
+                    old_tables_map[f"{s.name}.{t.name}"] = t
+                    
+        new_tables_map = {}
+        for s in new_schema.schemas:
+            for t in s.tables:
+                new_tables_map[f"{s.name}.{t.name}"] = t
+                
+        for t_key in new_tables_map:
+            if t_key not in old_tables_map:
+                added_tables.append(t_key)
+        for t_key in old_tables_map:
+            if t_key not in new_tables_map:
+                removed_tables.append(t_key)
+                
+        for t_key, new_t in new_tables_map.items():
+            if t_key in old_tables_map:
+                old_t = old_tables_map[t_key]
+                old_cols = {c.name for c in old_t.columns}
+                new_cols = {c.name for c in new_t.columns}
+                if (new_cols - old_cols) or (old_cols - new_cols):
+                    modified_tables.append(t_key)
+                for c in new_cols - old_cols:
+                    added_cols.append(f"{t_key}.{c}")
+                for c in old_cols - new_cols:
+                    removed_cols.append(f"{t_key}.{c}")
+                    
+        return SyncReport(
+            status="success",
+            added_schemas=added_schemas,
+            removed_schemas=removed_schemas,
+            added_tables=added_tables,
+            removed_tables=removed_tables,
+            modified_tables=modified_tables,
+            added_columns=added_cols,
+            removed_columns=removed_cols,
+            last_synced=datetime.utcnow().isoformat()
+        )
 
     def refresh_schema(self) -> SyncReport:
         old_schema = self.load_cached_schema()

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Sparkles, Database, History, Settings, LogOut, Code2, Link as LinkIcon } from 'lucide-react';
+import { LayoutDashboard, Sparkles, Database, History, LogOut, Code2, Link as LinkIcon } from 'lucide-react';
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ const MainLayout = () => {
     { name: 'AI Query', path: '/query', icon: Sparkles },
     { name: 'Schema Explorer', path: '/schema', icon: Database },
     { name: 'History', path: '/history', icon: History },
-    { name: 'Settings', path: '/settings', icon: Settings },
+
   ];
 
   return (

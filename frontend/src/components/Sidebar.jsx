@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, Database, History, Settings } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Database, History } from 'lucide-react';
 
 const Sidebar = () => {
   const links = [
@@ -8,7 +8,7 @@ const Sidebar = () => {
     { to: '/query', icon: MessageSquare, label: 'AI Query' },
     { to: '/schema', icon: Database, label: 'Schema Explorer' },
     { to: '/history', icon: History, label: 'Query History' },
-    { to: '/settings', icon: Settings, label: 'Settings' },
+
   ];
 
   return (

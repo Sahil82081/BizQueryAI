@@ -5,7 +5,7 @@ import Dashboard from './pages/Dashboard';
 import AIQuery from './pages/AIQuery';
 import SchemaExplorer from './pages/SchemaExplorer';
 import QueryHistory from './pages/QueryHistory';
-import Settings from './pages/Settings';
+
 import DatabaseConnections from './pages/DatabaseConnections';
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
           <Route path="query" element={<AIQuery />} />
           <Route path="schema" element={<SchemaExplorer />} />
           <Route path="history" element={<QueryHistory />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="settings" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>

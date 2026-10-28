@@ -1,6 +1,6 @@
 import os
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from app.config import settings
 from app.schemas.schema_info import TableMetadata
 
@@ -15,19 +15,24 @@ class SchemaRetrievalService:
         self.index_path = os.path.join(self.vector_dir, "faiss.index")
         self.meta_path = os.path.join(self.vector_dir, "metadata.json")
         
-        try:
-            import faiss
-            from sentence_transformers import SentenceTransformer
-            self.model = SentenceTransformer('all-MiniLM-L6-v2')
-            if os.path.exists(self.index_path) and os.path.exists(self.meta_path):
+        # Only initialize SentenceTransformer if the index actually exists
+        if os.path.exists(self.index_path) and os.path.exists(self.meta_path):
+            try:
+                import faiss
+                from sentence_transformers import SentenceTransformer
+                self.model = SentenceTransformer('all-MiniLM-L6-v2')
                 self.index = faiss.read_index(self.index_path)
                 with open(self.meta_path, "r", encoding="utf-8") as f:
                     self.metadata = json.load(f)
-        except Exception:
-            self.model = None
-            self.index = None
+            except Exception:
+                self.model = None
+                self.index = None
 
-    def retrieve_tables(self, query: str, all_tables: List[TableMetadata], top_k: int = 5) -> List[TableMetadata]:
+    def retrieve_tables(self, query: str, all_tables: List[TableMetadata], top_k: int = 5, glossary: Optional[Dict[str, str]] = None) -> List[TableMetadata]:
+        # If total database tables is small, supply all of them so we never slice off crucial context
+        if len(all_tables) <= 12:
+            return all_tables
+
         retrieved_names = []
         if self.model and self.index and self.index.ntotal > 0:
             try:
@@ -40,11 +45,29 @@ class SchemaRetrievalService:
             except Exception:
                 pass
                 
-        # Also keyword match
-        query_words = set(query.lower().split())
+        # Keyword matching on table names
+        query_clean = query.lower().replace(",", " ").replace(".", " ")
+        query_words = set(query_clean.split())
         for t in all_tables:
             if any(w in t.name.lower() for w in query_words) and t.name not in retrieved_names:
                 retrieved_names.append(t.name)
+
+        # Glossary term expansion (e.g. "revenue" -> mentions order_items)
+        if glossary:
+            for g_term, g_def in glossary.items():
+                if g_term.lower() in query_clean:
+                    g_def_clean = g_def.lower()
+                    for t in all_tables:
+                        if t.name.lower() in g_def_clean and t.name not in retrieved_names:
+                            retrieved_names.append(t.name)
+
+        # Column name keyword matching (e.g. query mentions date, month, price, amount)
+        for t in all_tables:
+            if t.name not in retrieved_names:
+                for c in t.columns:
+                    if any(w == c.name.lower() or w in c.name.lower().split('_') for w in query_words if len(w) > 3):
+                        retrieved_names.append(t.name)
+                        break
 
         # Foreign Key relationship expansion
         expanded_targets = set(retrieved_names)
@@ -62,4 +85,3 @@ class SchemaRetrievalService:
         if not matched:
             return all_tables[:top_k]
         return matched[:top_k]
-

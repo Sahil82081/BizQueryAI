@@ -1,3 +1,4 @@
+from typing import List, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -8,9 +9,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class QueryExecutionService:
-    def __init__(self, db: Session, llm_service: LLMService):
+    def __init__(self, db: Session, llm_service: LLMService, schemas: Optional[List[str]] = None):
         self.db = db
         self.llm = llm_service
+        self.schemas = schemas or []
         self.MAX_RETRIES = 1
         self.TIMEOUT_MS = 5000  # 5 seconds
         
@@ -28,6 +30,11 @@ class QueryExecutionService:
         try:
             # Enforce timeout
             self.db.execute(text(f"SET statement_timeout = {self.TIMEOUT_MS}"))
+
+            # Automatically include all relevant database schemas in PostgreSQL search_path
+            if self.schemas:
+                ordered_schemas = ["public"] + [s for s in self.schemas if s and s != "public"]
+                self.db.execute(text(f"SET search_path = {', '.join(ordered_schemas)}"))
             
             # Wrap query to enforce hard limit
             safe_sql = f"SELECT * FROM ({sql}) AS subq LIMIT 1000"

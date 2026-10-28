@@ -15,6 +15,7 @@ class ColumnMetadata(BaseModel):
 
 class TableMetadata(BaseModel):
     name: str
+    schema_name: Optional[str] = None
     columns: List[ColumnMetadata]
 
 class SchemaMetadata(BaseModel):

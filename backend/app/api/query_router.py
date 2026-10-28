@@ -33,22 +33,29 @@ def generate_query(request: Request, req: QueryRequest, db: Session = Depends(ge
     full_schema = discovery_service.load_cached_schema()
     
     all_tables = []
+    schema_names = []
     if full_schema:
         for s in full_schema.schemas:
-            all_tables.extend(s.tables)
+            if s.name and s.name not in schema_names and s.name not in ('pg_catalog', 'information_schema'):
+                schema_names.append(s.name)
+            for t in s.tables:
+                if not getattr(t, "schema_name", None):
+                    t.schema_name = s.name
+                all_tables.append(t)
             
     if not all_tables:
         return QueryResponse(error="Database schema is empty or not indexed.")
 
+    glossary = load_glossary()
     retrieval_service = SchemaRetrievalService(conn_id)
-    retrieved_tables = retrieval_service.retrieve_tables(req.question, all_tables, top_k=5)
+    retrieved_tables = retrieval_service.retrieve_tables(req.question, all_tables, top_k=10, glossary=glossary)
     
     schema_strings = []
     for rt in retrieved_tables:
         cols = ", ".join([f"{c.name} ({c.type})" for c in rt.columns])
-        schema_strings.append(f"Table {rt.name}: {cols}")
+        prefix = f"{rt.schema_name}." if getattr(rt, "schema_name", None) else ""
+        schema_strings.append(f"Table {prefix}{rt.name}: {cols}")
         
-    glossary = load_glossary()
     llm = LLMService()
     llm_output = llm.generate_sql(req.question, schema_strings, glossary)
     
@@ -63,7 +70,7 @@ def generate_query(request: Request, req: QueryRequest, db: Session = Depends(ge
         )
         
     generated_sql = llm_output.get("sql", "")
-    executor = QueryExecutionService(db, llm)
+    executor = QueryExecutionService(db, llm, schemas=schema_names)
     exec_result = executor.execute_with_retries(generated_sql, req.question)
     final_sql = exec_result.get("sql", generated_sql)
     
